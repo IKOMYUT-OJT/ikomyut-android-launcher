@@ -34,14 +34,23 @@ Open Visual Studio Code on your computer.
 Open a new terminal by going to Terminal > New Terminal in the top menu.
 
 Copy and paste the following command to download the code from GitHub:
+
+```bash
 git clone https://github.com/IKOMYUT-OJT/ikomyut-android-launcher.git
+```
 
 Move into the project folder by typing:
+
+```bash
 cd ikomyut-android-launcher
+```
 
 Step 2: Launch Android Studio from VS Code
 In the same VS Code terminal, type the following command to automatically launch the project in Android Studio:
+
+```bash
 studio .
+```
 
 Note: If the command above is not recognized, simply open Android Studio manually and select "Open" then navigate to the ikomyut-android-launcher folder.
 
@@ -67,10 +76,16 @@ Simply installing the app does not lock the device. You must "promote" the app t
 In Android Studio, click the Terminal tab at the bottom of the screen.
 
 Type the following command to ensure your device is recognized:
+
+```bash
 adb devices
+```
 
 Next, run this command exactly to lock the device into Kiosk mode:
+
+```bash
 adb shell dpm set-device-owner com.ikomyut.launcher/.DeviceAdminReceiver
+```
 
 Step 6: Set as Default Home Launcher
 Press the physical Home button on your POS device.
