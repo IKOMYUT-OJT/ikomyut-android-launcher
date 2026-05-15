@@ -6,10 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 
-/**
- * Receiver for Device Administration events.
- * Renamed back to DeviceAdminReceiver to match the existing Device Owner record on the POS.
- */
+
 class DeviceAdminReceiver : DeviceAdminReceiver() {
 
     override fun onEnabled(context: Context, intent: Intent) {

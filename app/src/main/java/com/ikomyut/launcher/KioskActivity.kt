@@ -30,7 +30,6 @@ class KioskActivity : Activity() {
     
     private val exitPassword = "ipick" 
     
-    // Theme Colors (Logo based)
     private val colorPrimary = "#004D25" // Dark Green
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +41,6 @@ class KioskActivity : Activity() {
             appManager = AppManager(this)
             appGrid = findViewById(R.id.app_grid)
 
-            // --- FORCE LOCK ON EVERY START ---
             kioskManager.setKioskLockedState(true)
 
             startClock()
@@ -50,7 +48,6 @@ class KioskActivity : Activity() {
             startNetworkMonitor()
             refreshAppGrid()
             
-            // --- LOCKING LOGIC ---
             if (kioskManager.isLocked()) {
                 kioskManager.lockKiosk(appManager.getExtraApps().toList())
                 startLockTask()
@@ -132,8 +129,7 @@ class KioskActivity : Activity() {
     private fun refreshAppGrid() {
         appGrid.removeAllViews()
         
-        // --- ADD SETTINGS AS THE FIRST ITEM ---
-        addSettingsCard()
+        
 
         val extraApps = appManager.getExtraApps()
         for (pkg in extraApps) {

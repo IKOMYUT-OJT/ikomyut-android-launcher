@@ -28,7 +28,6 @@ class KioskManager(private val context: Context) {
     fun lockKiosk(whitelist: List<String>) {
         try {
             if (isDeviceOwner()) {
-                // 1. Enable Kiosk Launcher Alias
                 val aliasName = ComponentName(context, "${context.packageName}.KioskLauncherAlias")
                 context.packageManager.setComponentEnabledSetting(
                     aliasName,
@@ -36,30 +35,25 @@ class KioskManager(private val context: Context) {
                     android.content.pm.PackageManager.DONT_KILL_APP
                 )
 
-                // 2. Set Lock Task Packages
                 val fullWhitelist = whitelist.toMutableList()
                 fullWhitelist.add(context.packageName)
                 fullWhitelist.add("com.android.settings")
                 fullWhitelist.add("com.telpo.printer")
                 mDpm.setLockTaskPackages(adminName, fullWhitelist.toTypedArray())
 
-                // 3. Disable Keyguard and Status Bar
                 mDpm.setKeyguardDisabled(adminName, true)
                 mDpm.setStatusBarDisabled(adminName, true)
 
-                // 4. Set as Default Launcher (Persistent Preferred Activity)
                 val filter = IntentFilter(Intent.ACTION_MAIN).apply {
                     addCategory(Intent.CATEGORY_HOME)
                     addCategory(Intent.CATEGORY_DEFAULT)
                 }
                 mDpm.addPersistentPreferredActivity(adminName, filter, aliasName)
 
-                // 5. Configure Lock Task Features
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                     mDpm.setLockTaskFeatures(adminName, DevicePolicyManager.LOCK_TASK_FEATURE_NONE)
                 }
 
-                // 6. Restrictions
                 mDpm.addUserRestriction(adminName, UserManager.DISALLOW_SAFE_BOOT)
                 mDpm.addUserRestriction(adminName, UserManager.DISALLOW_FACTORY_RESET)
                 
@@ -73,7 +67,6 @@ class KioskManager(private val context: Context) {
     fun unlockKiosk(persist: Boolean = true) {
         try {
             if (isDeviceOwner()) {
-                // 1. Disable Kiosk Launcher Alias
                 val aliasName = ComponentName(context, "${context.packageName}.KioskLauncherAlias")
                 context.packageManager.setComponentEnabledSetting(
                     aliasName,
@@ -81,14 +74,11 @@ class KioskManager(private val context: Context) {
                     android.content.pm.PackageManager.DONT_KILL_APP
                 )
 
-                // 2. Clear Default Launcher Preference
                 mDpm.clearPackagePersistentPreferredActivities(adminName, context.packageName)
 
-                // 3. Restore System UI
                 mDpm.setStatusBarDisabled(adminName, false)
                 mDpm.setKeyguardDisabled(adminName, false)
 
-                // 4. Remove Restrictions
                 mDpm.clearUserRestriction(adminName, UserManager.DISALLOW_SAFE_BOOT)
                 
                 if (persist) {

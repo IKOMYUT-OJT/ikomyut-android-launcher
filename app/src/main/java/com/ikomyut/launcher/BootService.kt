@@ -6,10 +6,6 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 
-/**
- * Service that waits for 10 seconds after boot before launching the Kiosk Activity.
- * This allows the default system launcher to be visible briefly as requested.
- */
 class BootService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
