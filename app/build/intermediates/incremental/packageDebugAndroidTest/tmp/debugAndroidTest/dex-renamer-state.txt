@@ -1,4 +1,0 @@
-#Tue May 12 16:59:54 SGT 2026
-base.0=C\:\\Users\\DEVELOPER PC\\Desktop\\lockdownapp\\app\\build\\intermediates\\dex\\debugAndroidTest\\mergeProjectDexDebugAndroidTest\\0\\classes.dex
-path.0=0/classes.dex
-renamed.0=classes.dex
