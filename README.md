@@ -1,70 +1,75 @@
-# iKomyut Kiosk Launcher 🚀
+Project Name: iKomyut Launcher
+The iKomyut Launcher is a professional-grade Android Kiosk application designed for POS (Point of Sale) systems. It restricts device access to a specific set of whitelisted applications, ensuring security and system integrity.
 
-A professional-grade Android Kiosk Launcher designed for POS (Point of Sale) systems. This launcher locks the device into a restricted environment, allowing only whitelisted applications to run.
+Features
+Total Lockdown: Disables system navigation and the status bar to prevent unauthorized access.
 
-## ✨ Features
-- **Total Lockdown**: Disables system navigation and status bar when locked.
-- **Custom App Grid**: Easy-to-use interface for launching approved applications.
-- **Admin Settings**: Password-protected menu to manage apps and toggle kiosk mode.
-- **System Monitors**: Real-time indicators for Battery, WiFi, and Cellular Data.
-- **Auto-Boot**: Automatically launches into Kiosk mode on device startup.
+Custom App Grid: A simplified interface for users to launch approved applications.
 
----
+Admin Settings: A password-protected menu for managing the app whitelist and toggling kiosk mode.
 
-## 🛠️ Installation Guide
+Real-time Monitoring: Built-in indicators for battery life, WiFi status, and cellular data connectivity.
 
-Follow these steps to install the launcher on your POS device:
+Prerequisites
+Before installing, ensure you have the following on your computer and device:
 
-### 1. Prerequisites
-- **Android Studio** installed on your computer.
-- **ADB (Android Debug Bridge)** configured in your system path.
-- **Developer Options** and **USB Debugging** enabled on your POS device.
-- Ensure **no other Google accounts** are signed in on the device (required for Device Owner setup).
+Android Studio (latest version recommended)
 
-### 2. Clone the Repository
-```bash
-git clone https://github.com/IKOMYUT-OJT/ikomyut-android-launcher.git
-cd ikomyut-android-launcher
-```
+ADB (Android Debug Bridge) configured in your system path
 
-### 3. Build & Install
-1. Open the project in **Android Studio**.
-2. Connect your POS device via USB.
-3. Build the APK and install it to your device (Shift + F10 or use the 'Run' button).
+USB Cable for device connection
 
-### 4. Set as Device Owner (CRITICAL)
-For the Kiosk mode to fully lock the device (disable home button, recent apps, etc.), you must set the app as the **Device Owner** via ADB:
+Developer Options and USB Debugging enabled on the POS device
 
-```powershell
+Ensure no Google or email accounts are signed in on the device (required for Device Owner setup)
+
+Installation Instructions
+Please follow these steps exactly to deploy the launcher on your machine.
+
+Step 1: Open the Project
+Launch Android Studio on your computer.
+
+Click on File > Open and navigate to the project folder (ikomyut-android-launcher).
+
+Wait for the "Gradle Sync" to complete. This ensures all project components are correctly loaded.
+
+Step 2: Install the App
+Connect your POS device to your computer via USB.
+
+In Android Studio, ensure your device name appears in the top device selection dropdown.
+
+Click the Green Play Button (Run) at the top or press Shift + F10.
+
+On the POS device, if prompted to "Allow USB Debugging," select Always allow and click OK.
+
+Step 3: Grant Administrative Privileges
+Once the app is installed, you must give it "Device Owner" permissions to enable the lockdown features.
+
+In Android Studio, click on the Terminal tab located at the bottom of the screen.
+
+First, check if your device is connected by typing:
+adb devices
+
+Next, run the following command to set the app as the Device Owner:
 adb shell dpm set-device-owner com.ikomyut.launcher/.DeviceAdminReceiver
-```
 
-> [!IMPORTANT]
-> If you get an error saying "already has accounts", you must remove all accounts (Google, etc.) from the device settings before running this command.
+Step 4: Set as Default Home Launcher
+Press the Home button on your POS device.
 
-### 5. Set as Default Home
-1. Press the **Home** button on your POS.
-2. Select **iKomyut Launcher** and choose **"Always"**.
+A prompt will appear asking which application to use for the Home screen.
 
----
+Select iKomyut Launcher and choose Always.
 
-## 🔐 Admin Access
-To manage applications or exit the Kiosk:
-1. Tap the **Settings** card in the app grid.
-2. Enter the Admin Password: `ipick`
-3. From the Admin Menu, you can:
-   - **Add Application**: Choose from installed apps to add to the launcher.
-   - **Remove Application**: Remove apps from the grid.
-   - **Unlock Kiosk Mode**: Temporarily disable the lock to access system settings.
+Admin Access
+To manage the launcher or add/remove apps:
 
----
+1. Tap the Settings icon on the main app grid.
+2. Enter the administrator password: ipick
+3. Use the menu to add applications, remove them, or unlock the kiosk mode.
 
-## 🏗️ Technical Details
-- **Package Name**: `com.ikomyut.launcher`
-- **Admin Receiver**: `.DeviceAdminReceiver`
-- **Minimum SDK**: Android 7.1.2 (Tested on Telpo POS)
+Troubleshooting
+Already has accounts error: If the terminal command fails with this error, you must go to Settings > Accounts on the device and remove all existing accounts before running the command again.
 
----
+Device not found: Ensure the USB cable is secure and that USB Debugging is still enabled in the device settings.
 
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Gradle Sync Failed: Ensure you have a stable internet connection for Android Studio to download the necessary dependencies.
