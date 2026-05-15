@@ -13,7 +13,9 @@ Real-time Monitoring: Built-in indicators for battery life, WiFi status, and cel
 Prerequisites
 Before installing, ensure you have the following on your computer and device:
 
-Android Studio (latest version recommended)
+Android Studio (latest version)
+
+Visual Studio Code (VS Code)
 
 ADB (Android Debug Bridge) configured in your system path
 
@@ -23,53 +25,70 @@ Developer Options and USB Debugging enabled on the POS device
 
 Ensure no Google or email accounts are signed in on the device (required for Device Owner setup)
 
-Installation Instructions
-Please follow these steps exactly to deploy the launcher on your machine.
+Detailed Installation Instructions
+Please follow these steps carefully. As a student learning deployment, missing a single line of code can prevent the Kiosk from locking correctly.
 
-Step 1: Open the Project
-Launch Android Studio on your computer.
+Step 1: Clone the Project in VS Code
+Open Visual Studio Code on your computer.
 
-Click on File > Open and navigate to the project folder (ikomyut-android-launcher).
+Open a new terminal by going to Terminal > New Terminal in the top menu.
 
-Wait for the "Gradle Sync" to complete. This ensures all project components are correctly loaded.
+Copy and paste the following command to download the code from GitHub:
+git clone https://github.com/IKOMYUT-OJT/ikomyut-android-launcher.git
 
-Step 2: Install the App
-Connect your POS device to your computer via USB.
+Move into the project folder by typing:
+cd ikomyut-android-launcher
 
-In Android Studio, ensure your device name appears in the top device selection dropdown.
+Step 2: Launch Android Studio from VS Code
+In the same VS Code terminal, type the following command to automatically launch the project in Android Studio:
+studio .
 
-Click the Green Play Button (Run) at the top or press Shift + F10.
+Note: If the command above is not recognized, simply open Android Studio manually and select "Open" then navigate to the ikomyut-android-launcher folder.
 
-On the POS device, if prompted to "Allow USB Debugging," select Always allow and click OK.
+Step 3: Sync and Build the Project
+Once Android Studio opens, look at the bottom of the window for a progress bar. This is the "Gradle Sync" process where the computer downloads the necessary building blocks for the app.
 
-Step 3: Grant Administrative Privileges
-Once the app is installed, you must give it "Device Owner" permissions to enable the lockdown features.
+Wait for the sync to finish completely.
 
-In Android Studio, click on the Terminal tab located at the bottom of the screen.
+Connect your POS device to your computer using a USB cable.
 
-First, check if your device is connected by typing:
+Step 4: Install the App to the POS
+In Android Studio, look at the top toolbar and ensure your POS device name is visible in the dropdown menu.
+
+Click the Green Play Button (Run) or press Shift + F10.
+
+Watch your POS device screen. If a pop-up appears asking to "Allow USB Debugging," check Always allow and tap OK.
+
+The app will now install and open automatically on the device.
+
+Step 5: Grant Administrative Privileges (Device Owner)
+Simply installing the app does not lock the device. You must "promote" the app to a Device Owner using the terminal.
+
+In Android Studio, click the Terminal tab at the bottom of the screen.
+
+Type the following command to ensure your device is recognized:
 adb devices
 
-Next, run the following command to set the app as the Device Owner:
+Next, run this command exactly to lock the device into Kiosk mode:
 adb shell dpm set-device-owner com.ikomyut.launcher/.DeviceAdminReceiver
 
-Step 4: Set as Default Home Launcher
-Press the Home button on your POS device.
+Step 6: Set as Default Home Launcher
+Press the physical Home button on your POS device.
 
-A prompt will appear asking which application to use for the Home screen.
+When the system asks which application to use, select iKomyut Launcher.
 
-Select iKomyut Launcher and choose Always.
+Choose Always. The device is now fully locked.
 
-Admin Access
-To manage the launcher or add/remove apps:
+Admin Access & Management
+To add apps or exit the kiosk:
 
-1. Tap the Settings icon on the main app grid.
+1. Tap the Settings icon on the main screen.
 2. Enter the administrator password: ipick
-3. Use the menu to add applications, remove them, or unlock the kiosk mode.
+3. From here, you can add new applications to the grid or unlock the kiosk for maintenance.
 
 Troubleshooting
-Already has accounts error: If the terminal command fails with this error, you must go to Settings > Accounts on the device and remove all existing accounts before running the command again.
+"Already has accounts" error: This means there is a Google or Email account on the device. You must go to Settings > Accounts and remove all accounts before the Step 5 command will work.
 
-Device not found: Ensure the USB cable is secure and that USB Debugging is still enabled in the device settings.
+"studio" is not recognized: This happens if Android Studio is not in your computer's environment path. If this occurs, just open Android Studio normally and use the "Open" menu.
 
-Gradle Sync Failed: Ensure you have a stable internet connection for Android Studio to download the necessary dependencies.
+Device not detected: Try a different USB cable or USB port, and ensure "USB Debugging" is still enabled in Developer Options.
