@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace 'com.example.poskiosk'
+    namespace 'com.ikomyut.launcher'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.poskiosk"
+        applicationId "com.ikomyut.launcher"
         minSdk 21
-        targetSdk 25
+        targetSdk 33
         versionCode 1
         versionName "1.0"
     }

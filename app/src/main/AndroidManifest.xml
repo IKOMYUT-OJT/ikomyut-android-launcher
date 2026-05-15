@@ -1,39 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.poskiosk">
+    package="com.ikomyut.launcher">
 
     <!-- Permission to start on boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.REBOOT" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- Android 11+ App Discovery Queries -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="false"
         android:label="POS Kiosk"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        android:testOnly="true"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
 
-        <!-- Main Kiosk Activity -->
+        <!-- Main Kiosk Activity (Always enabled as a normal app) -->
         <activity
             android:name=".KioskActivity"
             android:launchMode="singleInstance"
-            android:stateNotNeeded="true">
+            android:stateNotNeeded="true"
+            android:exported="true">
             
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
 
-            <!-- Make this app a Home Launcher -->
+        <!-- Kiosk Launcher Alias (Toggled for Kiosk Mode) -->
+        <activity-alias
+            android:name=".KioskLauncherAlias"
+            android:targetActivity=".KioskActivity"
+            android:label="POS Kiosk"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <!-- Device Admin Receiver -->
         <receiver
             android:name=".DeviceAdminReceiver"
             android:label="Kiosk Admin"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
             <meta-data
                 android:name="android.app.device_admin"
                 android:resource="@xml/device_admin_receiver" />
@@ -43,11 +65,28 @@
         </receiver>
 
         <!-- Boot Receiver -->
-        <receiver android:name=".BootReceiver">
+        <receiver 
+            android:name=".BootReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <!-- Shutdown Receiver -->
+        <receiver 
+            android:name=".ShutdownReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+                <action android:name="android.intent.action.REBOOT" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Boot Delay Service -->
+        <service 
+            android:name=".BootService"
+            android:exported="false" />
 
     </application>
 
