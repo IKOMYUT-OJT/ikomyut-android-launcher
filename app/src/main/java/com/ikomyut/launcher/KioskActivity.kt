@@ -41,12 +41,12 @@ class KioskActivity : Activity() {
             appManager = AppManager(this)
             appGrid = findViewById(R.id.app_grid)
 
-            kioskManager.setKioskLockedState(true)
-
             startClock()
             startBatteryMonitor()
             startNetworkMonitor()
             refreshAppGrid()
+            
+            kioskManager.setKioskLockedState(true)
             
             if (kioskManager.isLocked()) {
                 kioskManager.lockKiosk(appManager.getExtraApps().toList())
@@ -129,7 +129,7 @@ class KioskActivity : Activity() {
     private fun refreshAppGrid() {
         appGrid.removeAllViews()
         
-        
+        addSettingsCard()
 
         val extraApps = appManager.getExtraApps()
         for (pkg in extraApps) {
@@ -246,12 +246,16 @@ class KioskActivity : Activity() {
                             kioskManager.unlockKiosk()
                             stopLockTask()
                             Toast.makeText(this, "Kiosk Unlocked", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(Intent.ACTION_MAIN).apply {
-                                addCategory(Intent.CATEGORY_HOME)
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                            startActivity(intent)
-                            finish()
+                            
+                            // Delay slightly to let the OS register that we are no longer the default home
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                val intent = Intent(Intent.ACTION_MAIN).apply {
+                                    addCategory(Intent.CATEGORY_HOME)
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                }
+                                startActivity(intent)
+                                finishAffinity()
+                            }, 500)
                         } else {
                             kioskManager.lockKiosk(appManager.getExtraApps().toList())
                             startLockTask()

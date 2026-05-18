@@ -28,7 +28,7 @@ Real-time Monitoring: Built-in indicators for battery life, Wi-Fi status, and ce
 
 •	Developer Options and USB Debugging enabled on the POS device
 
- 	•	Ensure no Google or email accounts are signed in on the device (required 			for Device Owner setup)
+ 	•	Ensure no Google or email accounts are signed in on the device (required for Device Owner setup)
 
 
 Detailed Installation Instructions

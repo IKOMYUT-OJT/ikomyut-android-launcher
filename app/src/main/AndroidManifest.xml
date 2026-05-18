@@ -17,7 +17,8 @@
 
     <application
         android:allowBackup="false"
-        android:label="POS Kiosk"
+        android:icon="@drawable/ikomyut_icon"
+        android:label="iKomyut Launcher"
         android:testOnly="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
 
@@ -36,7 +37,7 @@
         <activity-alias
             android:name=".KioskLauncherAlias"
             android:targetActivity=".KioskActivity"
-            android:label="POS Kiosk"
+            android:label="iKomyut Launcher"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
