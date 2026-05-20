@@ -26,6 +26,7 @@
             android:name=".KioskActivity"
             android:launchMode="singleInstance"
             android:stateNotNeeded="true"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="true">
             
             <intent-filter>
@@ -76,10 +77,6 @@
                 <action android:name="android.intent.action.REBOOT" />
             </intent-filter>
         </receiver>
-
-        <service 
-            android:name=".BootService"
-            android:exported="false" />
 
     </application>
 

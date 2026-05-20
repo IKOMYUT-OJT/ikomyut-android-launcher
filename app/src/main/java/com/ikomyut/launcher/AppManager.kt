@@ -6,9 +6,11 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 
+/**
+ * Manages whitelist of user-selectable apps allowed to be launched in kiosk mode.
+ */
 class AppManager(private val context: Context) {
-    private val PREFS_NAME = "KioskPrefs"
-    private val EXTRA_APPS_KEY = "extra_apps"
+    
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val pm: PackageManager = context.packageManager
 
@@ -52,5 +54,10 @@ class AppManager(private val context: Context) {
             pm.getLaunchIntentForPackage(appInfo.packageName) != null && 
             appInfo.packageName != context.packageName
         }.sortedBy { pm.getApplicationLabel(it).toString().lowercase() }
+    }
+
+    companion object {
+        private const val PREFS_NAME = "KioskPrefs"
+        private const val EXTRA_APPS_KEY = "extra_apps"
     }
 }

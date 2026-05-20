@@ -2,34 +2,32 @@ package com.ikomyut.launcher
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.drawable.Drawable
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.InputType
-import android.util.TypedValue
+import android.text.TextUtils
 import android.view.Gravity
-import android.view.View
-import android.widget.*
-import androidx.cardview.widget.CardView
-import java.text.SimpleDateFormat
-import java.util.*
+import android.widget.EditText
+import android.widget.GridLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 
 class KioskActivity : Activity() {
 
     private lateinit var kioskManager: KioskManager
     private lateinit var appManager: AppManager
     private lateinit var appGrid: GridLayout
-    private var batteryReceiver: android.content.BroadcastReceiver? = null
+
+    private lateinit var clockTicker: ClockTicker
+    private lateinit var batteryMonitor: BatteryMonitor
+    private lateinit var networkMonitor: NetworkMonitor
     
     private val exitPassword = "ipick" 
-    
     private val colorPrimary = "#004D25" // Dark Green
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,89 +39,62 @@ class KioskActivity : Activity() {
             appManager = AppManager(this)
             appGrid = findViewById(R.id.app_grid)
 
-            startClock()
-            startBatteryMonitor()
-            startNetworkMonitor()
+            setupObservers()
             refreshAppGrid()
             
             kioskManager.setKioskLockedState(true)
-            
-            if (kioskManager.isLocked()) {
-                kioskManager.lockKiosk(appManager.getExtraApps().toList())
-                startLockTask()
-            }
+            kioskManager.lockKiosk(appManager.getExtraApps().toList())
+            startLockTask()
 
         } catch (e: Exception) {
             android.util.Log.e("KioskCrash", "Fatal error in onCreate", e)
         }
     }
 
-    private fun startClock() {
-        val tvClock = findViewById<TextView>(R.id.tv_clock) ?: return
-        val tvDate = findViewById<TextView>(R.id.tv_date) ?: return
-        val handler = Handler(Looper.getMainLooper())
-        val runnable = object : Runnable {
-            override fun run() {
-                val timeSdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
-                val dateSdf = SimpleDateFormat("EEEE, MMM d", Locale.getDefault())
-                tvClock.text = timeSdf.format(Date())
-                tvDate.text = dateSdf.format(Date())
-                handler.postDelayed(this, 10000)
-            }
-        }
-        handler.post(runnable)
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        kioskManager.setKioskLockedState(true)
+        kioskManager.lockKiosk(appManager.getExtraApps().toList())
+        startLockTask()
     }
 
-    private fun startBatteryMonitor() {
-        val tvBattery = findViewById<TextView>(R.id.tv_battery) ?: return
-        batteryReceiver = object : android.content.BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
-                val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
-                if (level != -1 && scale != -1) {
-                    val pct = (level * 100 / scale.toFloat()).toInt()
-                    tvBattery.text = "$pct%"
-                }
-            }
+    private fun setupObservers() {
+        val tvClock = findViewById<TextView>(R.id.tv_clock)
+        val tvDate = findViewById<TextView>(R.id.tv_date)
+        clockTicker = ClockTicker { time, date ->
+            tvClock?.text = time
+            tvDate?.text = date
         }
-        registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-    }
 
-    private fun startNetworkMonitor() {
+        val tvBattery = findViewById<TextView>(R.id.tv_battery)
+        batteryMonitor = BatteryMonitor(this) { pct ->
+            tvBattery?.text = "$pct%"
+        }
+
         val tvWifi = findViewById<TextView>(R.id.tv_wifi)
         val tvData = findViewById<TextView>(R.id.tv_data)
-        val handler = Handler(Looper.getMainLooper())
-        
-        val runnable = object : Runnable {
-            override fun run() {
-                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                var isWifi = false
-                var isData = false
-
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                    val network = cm.activeNetwork
-                    val capabilities = cm.getNetworkCapabilities(network)
-                    isWifi = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
-                    isData = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
-                } else {
-                    @Suppress("DEPRECATION")
-                    val info = cm.activeNetworkInfo
-                    @Suppress("DEPRECATION")
-                    isWifi = info?.type == ConnectivityManager.TYPE_WIFI
-                    @Suppress("DEPRECATION")
-                    isData = info?.type == ConnectivityManager.TYPE_MOBILE
-                }
-                
-                tvWifi?.text = if (isWifi) "WiFi: ON" else "WiFi: OFF"
-                tvWifi?.alpha = if (isWifi) 1.0f else 0.5f
-                
-                tvData?.text = if (isData) "Data: ON" else "Data: OFF"
-                tvData?.alpha = if (isData) 1.0f else 0.5f
-                
-                handler.postDelayed(this, 3000)
-            }
+        networkMonitor = NetworkMonitor(this) { isWifi, isData ->
+            tvWifi?.text = if (isWifi) "WiFi: ON" else "WiFi: OFF"
+            tvWifi?.alpha = if (isWifi) 1.0f else 0.5f
+            
+            tvData?.text = if (isData) "Data: ON" else "Data: OFF"
+            tvData?.alpha = if (isData) 1.0f else 0.5f
         }
-        handler.post(runnable)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        clockTicker.start()
+        batteryMonitor.start()
+        networkMonitor.start()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        clockTicker.stop()
+        batteryMonitor.stop()
+        networkMonitor.stop()
     }
 
     private fun refreshAppGrid() {
@@ -156,7 +127,6 @@ class KioskActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(dpToPx(50), dpToPx(50))
             setImageResource(R.drawable.ic_settings)
             scaleType = ImageView.ScaleType.FIT_CENTER
-            // Make settings icon white or colored to stand out on dark background
             setColorFilter(android.graphics.Color.WHITE)
         }
 
@@ -165,7 +135,7 @@ class KioskActivity : Activity() {
             setTextColor(android.graphics.Color.WHITE)
             textSize = 11f
             maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
+            ellipsize = TextUtils.TruncateAt.END
             gravity = Gravity.CENTER
             setPadding(0, dpToPx(4), 0, 0)
         }
@@ -201,7 +171,7 @@ class KioskActivity : Activity() {
             setTextColor(android.graphics.Color.WHITE)
             textSize = 11f
             maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
+            ellipsize = TextUtils.TruncateAt.END
             gravity = Gravity.CENTER
             setPadding(0, dpToPx(4), 0, 0)
         }
@@ -229,11 +199,10 @@ class KioskActivity : Activity() {
     }
 
     private fun showAdminMenu() {
-        val isLocked = kioskManager.isLocked()
         val options = arrayOf(
             "Add Application", 
             "Remove Application", 
-            if (isLocked) "Unlock Kiosk Mode" else "Lock Kiosk Mode"
+            "Unlock Kiosk Mode"
         )
         AlertDialog.Builder(this)
             .setTitle("Admin Settings")
@@ -242,25 +211,18 @@ class KioskActivity : Activity() {
                     0 -> showAddAppDialog()
                     1 -> showRemoveAppDialog()
                     2 -> {
-                        if (isLocked) {
-                            kioskManager.unlockKiosk()
-                            stopLockTask()
-                            Toast.makeText(this, "Kiosk Unlocked", Toast.LENGTH_SHORT).show()
-                            
-                            // Delay slightly to let the OS register that we are no longer the default home
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                val intent = Intent(Intent.ACTION_MAIN).apply {
-                                    addCategory(Intent.CATEGORY_HOME)
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                }
-                                startActivity(intent)
-                                finishAffinity()
-                            }, 500)
-                        } else {
-                            kioskManager.lockKiosk(appManager.getExtraApps().toList())
-                            startLockTask()
-                            Toast.makeText(this, "Kiosk Locked", Toast.LENGTH_SHORT).show()
-                        }
+                        kioskManager.unlockKiosk()
+                        stopLockTask()
+                        Toast.makeText(this, "Kiosk Unlocked", Toast.LENGTH_SHORT).show()
+                        
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            val intent = Intent(Intent.ACTION_MAIN).apply {
+                                addCategory(Intent.CATEGORY_HOME)
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
+                            startActivity(intent)
+                            finishAffinity()
+                        }, 500)
                     }
                 }
             }
@@ -273,9 +235,7 @@ class KioskActivity : Activity() {
         AlertDialog.Builder(this).setTitle("Select App").setItems(appNames) { _, which ->
             appManager.addApp(apps[which].packageName)
             refreshAppGrid()
-            if (kioskManager.isLocked()) {
-                kioskManager.lockKiosk(appManager.getExtraApps().toList())
-            }
+            kioskManager.lockKiosk(appManager.getExtraApps().toList())
         }.show()
     }
 
@@ -285,16 +245,9 @@ class KioskActivity : Activity() {
         AlertDialog.Builder(this).setTitle("Remove App").setItems(appNames) { _, which ->
             appManager.removeApp(apps[which])
             refreshAppGrid()
-            if (kioskManager.isLocked()) {
-                kioskManager.lockKiosk(appManager.getExtraApps().toList())
-            }
+            kioskManager.lockKiosk(appManager.getExtraApps().toList())
         }.show()
     }
 
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
-
-    override fun onDestroy() {
-        super.onDestroy()
-        batteryReceiver?.let { try { unregisterReceiver(it) } catch (e: Exception) {} }
-    }
 }
