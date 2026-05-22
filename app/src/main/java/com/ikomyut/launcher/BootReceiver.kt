@@ -31,7 +31,7 @@ class BootReceiver : BroadcastReceiver() {
                 flags
             )
             
-            val triggerTime = SystemClock.elapsedRealtime() + 10000 // 10 seconds
+            val triggerTime = SystemClock.elapsedRealtime() + 3000 // 3 seconds
             
             try {
                 alarmManager.set(
