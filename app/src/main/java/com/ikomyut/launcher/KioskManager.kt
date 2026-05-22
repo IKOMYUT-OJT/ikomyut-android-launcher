@@ -51,6 +51,11 @@ class KioskManager(private val context: Context) {
                     add(context.packageName)
                     add("com.android.settings")
                     add("com.telpo.printer")
+                    add("com.iposprinter.iposprinterservice")
+                    add("woyou.aidlservice.jiuiv5")
+                    add("com.sunmi.printerhelper")
+                    add("com.android.printspooler")
+                    add("com.android.bips")
                 }
                 mDpm.setLockTaskPackages(adminName, fullWhitelist.toTypedArray())
 
